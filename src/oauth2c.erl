@@ -222,6 +222,8 @@ do_retrieve_access_token(Client, Opts0) ->
   Opts = Opts0 -- [return_maps], %% Make sure we get a proplist
   #{headers := RequestHeaders,
     body := RequestBody} = prepare_token_request(Client, Opts),
+  io:format("RequestHeaders: ~p~n", [RequestHeaders]),
+  io:format("RequestBody: ~p~n", [RequestBody]),
   case restc:request(post, percent, Client#client.auth_url,
                      [200], RequestHeaders, RequestBody, Opts)
   of
