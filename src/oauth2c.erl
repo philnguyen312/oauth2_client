@@ -103,6 +103,47 @@ client(Type, URL, ID, Secret, Scope) ->
           , scope     = Scope
           }.
 
+%% for getting access token from the service account Client, Client can be created from the api above
+retrieve_access_token(Type, Url, Client) ->
+  #{headers := RequestHeaders,
+    body := RequestBody} = prepare_token_request(Client, Opts),
+  io:format("RequestBody: ~p~n", [RequestBody]),
+  case restc:request(post, percent, Client#client.auth_url,
+                     [200], RequestHeaders, RequestBody, Opts)
+  of
+    {ok, _, Headers, Body} ->
+      io:format("OK RESPONSE: Body: ~p~n", [Body]),
+      AccessToken = proplists:get_value(<<"access_token">>, Body),
+      TokenType = proplists:get_value(<<"token_type">>, Body, ""),
+      ExpireTime =
+        case proplists:get_value(<<"expires_in">>, Body) of
+          undefined -> undefined;
+          ExpiresIn -> erlang:system_time(second) + ExpiresIn
+        end,
+      RefreshToken = proplists:get_value(<<"refresh_token">>,
+                                         Body,
+                                         Client#client.refresh_token),
+      Result = #client{ grant_type    = Client#client.grant_type
+                      , auth_url      = Client#client.auth_url
+                      , access_token  = AccessToken
+                      , refresh_token = RefreshToken
+                      , token_type    = get_token_type(TokenType)
+                      , id            = Client#client.id
+                      , secret        = Client#client.secret
+                      , scope         = Client#client.scope
+                      , service       = Client#client.service
+                      , expire_time   = ExpireTime
+                      },
+      {ok, Headers, Result};
+    {error, _, _, Reason} ->
+      {error, Reason};
+    {error, Reason} ->
+      {error, Reason}
+  end.
+
+
+
+
 -spec retrieve_access_token(Type, URL, ID, Secret) ->
     {ok, Headers::headers(), client()} | {error, Reason :: binary()} when
     Type   :: at_type(),
@@ -347,8 +388,7 @@ get_str_token_type(_Else) -> unsupported.
 
 do_request(Method, Type, Url, Expect, Headers0, Body, Options, Client) ->
   Headers = add_auth_header(Headers0, Client),
-  io:format("skipping new Headers: ~p~n", [Headers]),
-  {restc:request(Method, Type, Url, Expect, Headers0, Body, Options), Client}.
+  {restc:request(Method, Type, Url, Expect, Headers, Body, Options), Client}.
 
 add_auth_header(Headers, #client{grant_type = <<"azure_client_credentials">>,
                                  access_token = AccessToken}) ->
