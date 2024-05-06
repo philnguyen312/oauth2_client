@@ -31,6 +31,7 @@
 -export([client/4]).
 -export([client/5]).
 
+-export([retrieve_access_token/1]).
 -export([retrieve_access_token/4]).
 -export([retrieve_access_token/5]).
 -export([retrieve_access_token/6]).
@@ -104,9 +105,9 @@ client(Type, URL, ID, Secret, Scope) ->
           }.
 
 %% for getting access token from the service account Client, Client can be created from the api above
-retrieve_access_token(Type, Url, Client) ->
+retrieve_access_token(Client) ->
   #{headers := RequestHeaders,
-    body := RequestBody} = prepare_token_request(Client, Opts),
+    body := RequestBody} = prepare_token_request(Client, []),
   io:format("RequestBody: ~p~n", [RequestBody]),
   case restc:request(post, percent, Client#client.auth_url,
                      [200], RequestHeaders, RequestBody, Opts)
