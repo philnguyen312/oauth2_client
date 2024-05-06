@@ -222,7 +222,6 @@ do_retrieve_access_token(Client, Opts0) ->
   Opts = Opts0 -- [return_maps], %% Make sure we get a proplist
   #{headers := RequestHeaders,
     body := RequestBody} = prepare_token_request(Client, Opts),
-  io:format("RequestHeaders: ~p~n", [RequestHeaders]),
   io:format("RequestBody: ~p~n", [RequestBody]),
   case restc:request(post, percent, Client#client.auth_url,
                      [200], RequestHeaders, RequestBody, Opts)
@@ -348,7 +347,8 @@ get_str_token_type(_Else) -> unsupported.
 
 do_request(Method, Type, Url, Expect, Headers0, Body, Options, Client) ->
   Headers = add_auth_header(Headers0, Client),
-  {restc:request(Method, Type, Url, Expect, Headers, Body, Options), Client}.
+  io:format("skipping new Headers: ~p~n", [Headers]),
+  {restc:request(Method, Type, Url, Expect, Headers0, Body, Options), Client}.
 
 add_auth_header(Headers, #client{grant_type = <<"azure_client_credentials">>,
                                  access_token = AccessToken}) ->
