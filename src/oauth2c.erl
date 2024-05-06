@@ -110,7 +110,7 @@ retrieve_access_token(Client) ->
     body := RequestBody} = prepare_token_request(Client, []),
   io:format("RequestBody: ~p~n", [RequestBody]),
   case restc:request(post, percent, Client#client.auth_url,
-                     [200], RequestHeaders, RequestBody, Opts)
+                     [200], RequestHeaders, RequestBody, [])
   of
     {ok, _, Headers, Body} ->
       io:format("OK RESPONSE: Body: ~p~n", [Body]),
