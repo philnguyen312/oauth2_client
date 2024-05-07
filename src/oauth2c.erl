@@ -108,12 +108,12 @@ client(Type, URL, ID, Secret, Scope) ->
 retrieve_access_token(Client) ->
   #{headers := RequestHeaders,
     body := RequestBody} = prepare_token_request(Client, []),
-  io:format("RequestBody: ~p~n", [RequestBody]),
+  %io:format("RequestBody: ~p~n", [RequestBody]),
   case restc:request(post, percent, Client#client.auth_url,
                      [200], RequestHeaders, RequestBody, [])
   of
     {ok, _, Headers, Body} ->
-      io:format("OK RESPONSE: Body: ~p~n", [Body]),
+      %io:format("OK RESPONSE: Body: ~p~n", [Body]),
       AccessToken = proplists:get_value(<<"access_token">>, Body),
       TokenType = proplists:get_value(<<"token_type">>, Body, ""),
       ExpireTime =
@@ -264,7 +264,7 @@ do_retrieve_access_token(Client, Opts0) ->
   Opts = Opts0 -- [return_maps], %% Make sure we get a proplist
   #{headers := RequestHeaders,
     body := RequestBody} = prepare_token_request(Client, Opts),
-  io:format("RequestBody: ~p~n", [RequestBody]),
+  %io:format("RequestBody: ~p~n", [RequestBody]),
   case restc:request(post, percent, Client#client.auth_url,
                      [200], RequestHeaders, RequestBody, Opts)
   of
